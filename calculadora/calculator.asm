@@ -1,14 +1,17 @@
 section .data
+  title db "--- Calculadora baśica (dígito único) ---", 0xa, 0xa
+  len_title equ $ - title
+
   msg1 db "Digite o primeiro número: ", 0xa
   len1 equ $ - msg1 
   
   msg2 db "Digite o segundo número: ", 0xa
   len2 equ $ - msg2
   
-  res_msg db "Resultado: ", 0xa  
+  res_msg db 0xa, "--- Resultado ---", 0xa 
   len_res equ $ - res_msg
   
-  soma_msg db "soma: "
+  soma_msg db 0xa, "soma: "
   len_soma equ $ - soma_msg
   
   sub_msg db 0xa, "subtração: "
@@ -17,18 +20,28 @@ section .data
   mul_msg db 0xa, "multiplicaçao: "
   len_mul equ $ - mul_msg
   
-  div_msg db 0xa, "divisão: "
+  div_msg db 0xa, "divisão inteira: "
   len_div equ $ - div_msg
   
+  fim db 0xa,  "----------------------------------------"
+  len_fim equ $ - fim
+  
 section .bss
-  num1 resb 2 
-  num2 resb 2 
+  num1 resb 3 
+  num2 resb 3 
   resposta resb 2
 
 section .text
 	global _start
 	
 _start:
+  ; titulo
+    mov eax, 4; sys_write
+    mov ebx, 1; saída padrão
+    mov ecx, title
+    mov edx, len_title
+    int 0x80; executa a sys_call 
+
   ; primeiro numero
 	mov eax, 4
 	mov ebx, 1
@@ -36,8 +49,8 @@ _start:
 	mov edx, len1
 	int 0x80
 	
-	mov eax, 3
-	mov ebx, 0 
+	mov eax, 3; sys_read
+	mov ebx, 0; entrada padrão 
 	mov ecx, num1 
 	mov edx, 2
 	int 0x80
@@ -63,6 +76,11 @@ soma:
   add al, bl
   add al, '0'
   mov [resposta], al
+  
+  mov eax ,4
+  mov ebx, 1
+  mov ecx, res_msg
+  mov edx, len_res
   int 0x80
   
   mov eax, 4
@@ -85,19 +103,18 @@ subtracao:
   sub al, bl
   add al, '0'
   mov [resposta], al
-  int 0x80
   
   mov eax, 4
   mov ebx, 1
   mov ecx, sub_msg
   mov edx, len_sub
   int 0x80
-  
+ 
   mov eax, 4
   mov ebx, 1
   mov ecx, resposta
   mov edx, 2
-  int 0x80  
+  int 0x80
   
 multiplicacao:
   mov al, [num1]
@@ -107,7 +124,6 @@ multiplicacao:
   mul bl
   add al, '0'
   mov [resposta], al
-  int 0x80
   
   mov eax, 4
   mov ebx, 1
@@ -119,9 +135,10 @@ multiplicacao:
   mov ebx, 1
   mov ecx, resposta
   mov edx, 2
-  int 0x80  
+  int 0x80 
   
 divisao:
+  mov ah, 0
   mov al, [num1]
   mov bl, [num2]
   sub al, '0'
@@ -129,7 +146,6 @@ divisao:
   div bl
   add al, '0'
   mov [resposta], al
-  int 0x80
   
   mov eax, 4
   mov ebx, 1
@@ -141,7 +157,13 @@ divisao:
   mov ebx, 1
   mov ecx, resposta
   mov edx, 2
-  int 0x80  
+  int 0x80
+  
+  mov eax, 4
+  mov ebx, 1
+  mov ecx, fim
+  mov edx, len_fim
+  int 0x80
 
 exit:
   mov eax, 1 
