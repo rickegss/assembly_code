@@ -1,5 +1,5 @@
 section .data
-  title db "--- Calculadora baśica (dígito único) ---", 0xa, 0xa
+  title db "--- Calculadora em Assembly ---", 0xa, 0xa
   len_title equ $ - title
 
   msg1 db "Digite o primeiro número: ", 0xa
@@ -9,10 +9,10 @@ section .data
   len2 equ $ - msg2
   
   menu db 0xa, "Insira a opção da operação desejada:", 0Ah, \
-     "1- Soma", 0Ah, \
-     "2- Subtração", 0Ah, \
-     "3- Multiplicação", 0Ah, \
-     "4- Divisão", 0Ah, \
+     "[1] - Soma", 0Ah, \
+     "[2] - Subtração", 0Ah, \
+     "[3] - Multiplicação", 0Ah, \
+     "[4] - Divisão", 0Ah, \
      "", 0Ah, \
      "0- Sair", 0Ah, 0
   len_menu equ $ - menu
@@ -45,6 +45,8 @@ section .data
   
   exit_msg db 0xa, "Fim do programa."
   len_exit equ $ - exit_msg
+  
+  contador dw 0
   
 section .bss
   num1 resb 3 
@@ -188,7 +190,9 @@ soma:
   mov ecx, resposta
   mov edx, 2
   int 0x80
-  jmp menu_final
+  
+  mov word [contador], 0
+  jmp loop_
   
 subtracao:
   mov al, [num1]
@@ -210,7 +214,9 @@ subtracao:
   mov ecx, resposta
   mov edx, 2
   int 0x80
-  jmp menu_final
+  
+  mov word [contador], 0
+  jmp loop_
   
 multiplicacao:
   mov al, [num1]
@@ -232,7 +238,9 @@ multiplicacao:
   mov ecx, resposta
   mov edx, 2
   int 0x80 
-  jmp menu_final
+  
+  mov word [contador], 0
+  jmp loop_
   
 divisao:
   mov ah, 0
@@ -261,7 +269,36 @@ divisao:
   mov ecx, sep
   mov edx, len_sep
   int 0x80
-  jmp menu_final
+  
+  mov word [contador], 0
+  jmp loop_
+  
+loop_:
+  mov cx, [contador]
+  cmp cx, 2
+  je menu_final
+
+  mov al, [resposta]
+  inc al            
+  mov [resposta], al
+
+  mov eax, 4
+  mov ebx, 1
+  mov ecx, sep  
+  mov edx, 1         
+  int 0x80
+
+  mov eax, 4        
+  mov ebx, 1         
+  mov ecx, resposta  
+  mov edx, 1         
+  int 0x80
+
+  mov cx, [contador]
+  inc cx
+  mov [contador], cx
+  
+  jmp loop_
 
 exit:
     mov eax, 4
